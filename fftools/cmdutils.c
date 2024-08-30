@@ -811,6 +811,7 @@ int split_commandline(OptionParseContext *octx, int argc, char *argv[],
             continue;
         }
         /* unnamed group separators, e.g. output filename */
+        /* 不以-开头，或者以开头后面跟空格，或者以--空格开头都认为一个组结束了 */
         if (opt[0] != '-' || !opt[1] || dashdash+1 == optindex) {
             ret = finish_group(octx, 0, opt);
             if (ret < 0)

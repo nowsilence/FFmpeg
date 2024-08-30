@@ -209,7 +209,10 @@ typedef struct OptionDef {
 #define OPT_DATA        (1 << 6)
 /* The option is per-file (currently ffmpeg-only). At least one of OPT_INPUT,
  * OPT_OUTPUT, OPT_DECODER must be set when this flag is in use.
-   */
+ * 这个属性目前只有 ffmpeg.exe 在用，因为 ffmpeg.exe 支持多个输入文件跟多个输出文件，
+ * 所以这个属性是标记命令行参数只作用于一个输入/输出文件的。
+ * OPT_PERFILE 是跟 OPT_OFFSET 或者 OPT_SPEC 一起使用的。
+ */
 #define OPT_PERFILE     (1 << 7)
 
 /* Option is specified as an offset in a passed optctx.
