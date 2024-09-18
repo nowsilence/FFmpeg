@@ -308,9 +308,13 @@ static const struct URLProtocol *url_find_protocol(const char *filename)
 {
     const URLProtocol **protocols;
     char proto_str[128], proto_nested[128], *ptr;
+    // 返回第一个不属于URL_SCHEME_CHARS中字符的位置
     size_t proto_len = strspn(filename, URL_SCHEME_CHARS);
     int i;
 
+    // 不包含“:” 且头8个字母不为“subfile,”
+    // 或者余下的字符不包含“:”
+    // 或者是dos路径格式
     if (filename[proto_len] != ':' &&
         (strncmp(filename, "subfile,", 8) || !strchr(filename + proto_len + 1, ':')) ||
         is_dos_path(filename))

@@ -551,6 +551,7 @@ static void check_options(const OptionDef *po)
 
 void parse_loglevel(int argc, char **argv, const OptionDef *options)
 {
+    // loglevel和v都是日志级别 值域范围 get_level_str
     int idx = locate_option(argc, argv, options, "loglevel");
     char *env;
 
@@ -560,6 +561,7 @@ void parse_loglevel(int argc, char **argv, const OptionDef *options)
         idx = locate_option(argc, argv, options, "v");
     if (idx && argv[idx + 1])
         opt_loglevel(NULL, "loglevel", argv[idx + 1]);
+    // :将日志打印至文件
     idx = locate_option(argc, argv, options, "report");
     env = getenv_utf8("FFREPORT");
     if (env || idx) {
@@ -611,7 +613,7 @@ int opt_default(void *optctx, const char *opt, const char *arg)
     if (!(p = strchr(opt, ':')))
         p = opt + strlen(opt);
     av_strlcpy(opt_stripped, opt, FFMIN(sizeof(opt_stripped), p - opt + 1));
-
+    // 编码器参数解析 aframes 等价frames:a, ab等价-b:a
     if ((o = opt_find(&cc, opt_stripped, NULL, 0,
                          AV_OPT_SEARCH_CHILDREN | AV_OPT_SEARCH_FAKE_OBJ)) ||
         ((opt[0] == 'v' || opt[0] == 'a' || opt[0] == 's') &&
@@ -619,6 +621,7 @@ int opt_default(void *optctx, const char *opt, const char *arg)
         av_dict_set(&codec_opts, opt, arg, FLAGS);
         consumed = 1;
     }
+    // avformat_options参数解析
     if ((o = opt_find(&fc, opt, NULL, 0,
                          AV_OPT_SEARCH_CHILDREN | AV_OPT_SEARCH_FAKE_OBJ))) {
         av_dict_set(&format_opts, opt, arg, FLAGS);
@@ -781,7 +784,9 @@ void uninit_parse_context(OptionParseContext *octx)
 
     uninit_opts();
 }
-
+/**
+ * ffmpeg -i input -s 1280x720 -acodec … -vcodec … output1 -s 640x480  -acodec … -vcodec … output2 -s 320x240  -acodec … -vcodec … output3
+ */
 int split_commandline(OptionParseContext *octx, int argc, char *argv[],
                       const OptionDef *options,
                       const OptionGroupDef *groups, int nb_groups)
@@ -810,8 +815,11 @@ int split_commandline(OptionParseContext *octx, int argc, char *argv[],
             dashdash = optindex;
             continue;
         }
-        /* unnamed group separators, e.g. output filename */
-        /* 不以-开头，或者以开头后面跟空格，或者以--空格开头都认为一个组结束了 */
+        /*  unnamed group separators, e.g. output filename */
+        /*  不以-开头，或者以开头后面跟空格，或者以--空格开头都认为一个组结束了
+            ffmpeg -i juren.mp4 -- -juren.flv  
+            --转义符，如果文件名有-字符
+        */
         if (opt[0] != '-' || !opt[1] || dashdash+1 == optindex) {
             ret = finish_group(octx, 0, opt);
             if (ret < 0)

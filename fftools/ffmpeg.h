@@ -124,30 +124,39 @@ typedef struct OptionsContext {
     OptionGroup *g;
 
     /* input/output options */
-    int64_t start_time;
-    int64_t start_time_eof;
+    int64_t start_time; // -ss time_off    指定输出音/视频的开始时间点，单位秒，也支持hh:mm:ss的格式
+    int64_t start_time_eof; // -sseof 从音/视频尾部开始，值为负数 须配合-t使用
     int seek_timestamp;
-    const char *format;
+    const char *format; // -f fmt 指定音/视频的格式
 
+    // -c codec 设置编码器名称  ffmpeg.exe -c:v h264_cuvid -c:v h264_mf -i juren.mp4 juren.flv
     SpecifierOptList codec_names;
-    SpecifierOptList audio_ch_layouts;
-    SpecifierOptList audio_channels;
-    SpecifierOptList audio_sample_rate;
-    SpecifierOptList frame_rates;
+    /**
+     *  -channel_layout layout
+     *  参数用于指定音频通道的布局。‌
+        在FFmpeg中，channel_layout参数用于定义音频流的通道布局，即音频信号中各个声道的配置方式。这个参数对于处理多声道音频（如立体声、环绕声等）非常重要，因为它决定了如何组织和解释音频数据。channel_layout参数可以接受整数或对应的短语，用于指定通道的配置方式。例如，立体声通常使用stereo作为通道布局，而5.1环绕声则会有更复杂的通道布局描述。
+        此外，channel_layout参数还与采样率（sample_rate）和每帧的样本数（nb_samples）等参数一起使用，共同定义了音频源的属性。这些参数的设置对于确保音频的正确播放和后续的音频处理（如转码、混音等）至关重要。
+        在实际应用中，channel_layout参数的使用场景包括但不限于音频源的创建、音频滤镜的设置、以及音视频文件的处理等。通过正确地设置这些参数，可以实现对音频数据的精细控制，满足不同的音频处理需求。
+        总的来说，channel_layout是FFmpeg中一个重要的音频参数，它允许用户指定音频通道的布局方式，这对于处理多声道音频数据至关重要。通过合理地设置和使用这个参数，可以确保音频的正确播放和处理‌
+     */
+    SpecifierOptList audio_ch_layouts; 
+    SpecifierOptList audio_channels; // -ac channels  指定音频声道数量
+    SpecifierOptList audio_sample_rate; // -ar rate 指定音频采样率 (单位 Hz)
+    SpecifierOptList frame_rates; // -r rate   指定帧率 (单位Hz ) 设置输出视频帧率
     SpecifierOptList max_frame_rates;
-    SpecifierOptList frame_sizes;
+    SpecifierOptList frame_sizes; // -s size   指定分辨率 (WxH)
     SpecifierOptList frame_pix_fmts;
 
     /* input options */
     int64_t input_ts_offset;
     int loop;
-    int rate_emu;
-    float readrate;
+    int rate_emu; // -re 等价 -readrate 1 用于以原始帧率读取输入文件。‌这意味着，当处理具有可变帧率（VFR）的视频时，FFmpeg会尝试以最接近原始视频的帧率来读取和输出数据，而不是尝试重新采样到恒定的帧率。
+    float readrate; // // -readrate 需要指定一个数值，该数值表示每秒读取的帧数。例如，如果设置-readrate 25，则意味着每秒读取25帧。这个参数对于确保视频流以正确的帧率进行播放至关重要，尤其是在处理不同帧率的视频源时。
     double readrate_initial_burst;
     int accurate_seek;
     int thread_queue_size;
     int input_sync_ref;
-    int find_stream_info;
+    int find_stream_info; // -find_stream_info 读取媒体文件的包以获取流信息。这对于没有文件头的格式（如MPEG）特别有用
 
     SpecifierOptList ts_scale;
     SpecifierOptList dump_attachment;
@@ -165,8 +174,8 @@ typedef struct OptionsContext {
 
     int chapters_input_file;
 
-    int64_t recording_time;
-    int64_t stop_time;
+    int64_t recording_time; // -t duration  指定输出音/视频的时长，单位秒
+    int64_t stop_time; // -to time_stop 指定输出音/视频结束点，单位秒
     int64_t limit_filesize;
     float mux_preload;
     float mux_max_delay;

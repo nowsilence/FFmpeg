@@ -957,6 +957,7 @@ int main(int argc, char **argv)
     av_log_set_flags(AV_LOG_SKIP_REPEATED);
     parse_loglevel(argc, argv, options);
 
+// 和多媒体设备交互需要调用
 #if CONFIG_AVDEVICE
     avdevice_register_all();
 #endif

@@ -78,7 +78,7 @@ int vstats_version = 2;
 int auto_conversion_filters = 1;
 int64_t stats_period = 500000;
 
-
+// -y 覆盖同名的输出文件
 static int file_overwrite     = 0;
 static int no_file_overwrite  = 0;
 int ignore_unknown_streams = 0;
@@ -687,7 +687,15 @@ int assert_file_overwrite(const char *filename)
                 fprintf(stderr,"File '%s' already exists. Overwrite? [y/N] ", filename);
                 fflush(stderr);
                 term_exit();
-                signal(SIGINT, SIG_DFL);
+                // 信号（signal）可以通过按键产生，这是信号产生的一种形式，也可以通其他方式产生
+                // CTRL +C 触发SIGINT中断信号
+                // Ctrl+Z SIGSTOP 进程暂停执行，而不是结束进程，且该信号不能被阻塞、处理或忽略‌
+                // CTRL +\ SIGQUIT信号 
+                signal(SIGINT, SIG_DFL); // 
+                // 信号-中断信号
+                // SIG_IGN 操作-忽略信号
+                // SIG_DFL 操作-系统默认处理
+
                 if (!read_yesno()) {
                     av_log(NULL, AV_LOG_FATAL, "Not overwriting - exiting\n");
                     return AVERROR_EXIT;
@@ -1301,6 +1309,11 @@ int ffmpeg_parse_options(int argc, char **argv, Scheduler *sch)
     }
 
     /* apply global options */
+    /* sch参数其实没有用到，parse_optgroup->write_option->
+    void *dst = po->flags & OPT_FLAG_OFFSET ?
+                (uint8_t *)optctx + po->u.off : po->u.dst_ptr;
+    具有这个OPT_FLAG_OFFSET标志的均为非全局变量
+    */
     ret = parse_optgroup(sch, &octx.global_opts, options);
     if (ret < 0) {
         errmsg = "parsing global options";
@@ -1353,6 +1366,12 @@ fail:
     return ret;
 }
 
+/**
+ * pipe:1 代表stdout pipe:0 stdin pipe:2 stderr
+ * -progress pipe:1 
+ * -progress output.log
+ * -progress -
+ */
 static int opt_progress(void *optctx, const char *opt, const char *arg)
 {
     AVIOContext *avio = NULL;
@@ -1370,6 +1389,9 @@ static int opt_progress(void *optctx, const char *opt, const char *arg)
     return 0;
 }
 
+/**
+ * 设置转码最长时间，当转码时间超过设定超时时间时，自动结束进程、避免耗费过多资源和时间
+ */
 int opt_timelimit(void *optctx, const char *opt, const char *arg)
 {
 #if HAVE_SETRLIMIT

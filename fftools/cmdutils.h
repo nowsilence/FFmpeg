@@ -159,7 +159,7 @@ unsigned stream_specifier_match(const StreamSpecifier *ss,
 void stream_specifier_uninit(StreamSpecifier *ss);
 
 typedef struct SpecifierOpt {
-    // original specifier or empty string
+    // original specifier or empty string 会是a/v或者是空字符，区分音频还是视频
     char            *specifier;
     // parsed specifier for OPT_FLAG_PERSTREAM options
     StreamSpecifier  stream_spec;
@@ -222,6 +222,7 @@ typedef struct OptionDef {
 
 /* Option is to be stored in a SpecifierOptList.
    Always use as OPT_SPEC in option definitions. */
+/* 参数在OptionsContext对象中的类型是否为SpecifierOptList */
 #define OPT_FLAG_SPEC   (1 << 9)
 #define OPT_SPEC        (OPT_FLAG_SPEC | OPT_OFFSET)
 
@@ -336,7 +337,7 @@ typedef struct OptionGroupDef {
 
 typedef struct OptionGroup {
     const OptionGroupDef *group_def;
-    const char *arg;
+    const char *arg; // 输入或者输出的文件名
 
     Option *opts;
     int  nb_opts;

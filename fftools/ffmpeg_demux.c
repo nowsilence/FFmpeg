@@ -125,7 +125,7 @@ typedef struct Demuxer {
     /* number of streams that the user was warned of */
     int                   nb_streams_warn;
 
-    float                 readrate;
+    float                 readrate; 
     double                readrate_initial_burst;
 
     Scheduler            *sch;
@@ -1638,6 +1638,7 @@ int ifile_open(const OptionsContext *o, const char *filename, Scheduler *sch)
     }
 
     if (o->format) {
+        // 查找音/视频的格式
         if (!(file_iformat = av_find_input_format(o->format))) {
             av_log(d, AV_LOG_FATAL, "Unknown input format: '%s'\n", o->format);
             return AVERROR(EINVAL);
@@ -1646,7 +1647,9 @@ int ifile_open(const OptionsContext *o, const char *filename, Scheduler *sch)
 
     if (!strcmp(filename, "-"))
         filename = "fd:";
-
+    /*
+        linux下，摄像头或麦克风作为设备文件存在于/dev/目录下，视频设备一般命名为/dev/video0、/dev/videoN这种形式。
+    */
     stdin_interaction &= strncmp(filename, "pipe:", 5) &&
                          strcmp(filename, "fd:") &&
                          strcmp(filename, "/dev/stdin");
