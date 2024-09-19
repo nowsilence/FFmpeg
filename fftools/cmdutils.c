@@ -613,7 +613,8 @@ int opt_default(void *optctx, const char *opt, const char *arg)
     if (!(p = strchr(opt, ':')))
         p = opt + strlen(opt);
     av_strlcpy(opt_stripped, opt, FFMIN(sizeof(opt_stripped), p - opt + 1));
-    // 编码器参数解析 aframes 等价frames:a, ab等价-b:a
+    // 编码器参数解析 aframes 等价frames:a, ab等价-b:a 
+    // s指的是subtitle
     if ((o = opt_find(&cc, opt_stripped, NULL, 0,
                          AV_OPT_SEARCH_CHILDREN | AV_OPT_SEARCH_FAKE_OBJ)) ||
         ((opt[0] == 'v' || opt[0] == 'a' || opt[0] == 's') &&
@@ -817,8 +818,12 @@ int split_commandline(OptionParseContext *octx, int argc, char *argv[],
         }
         /*  unnamed group separators, e.g. output filename */
         /*  不以-开头，或者以开头后面跟空格，或者以--空格开头都认为一个组结束了
-            ffmpeg -i juren.mp4 -- -juren.flv  
+            ffmpeg -i juren.mp4 -- -juren.flv  这里可以认为是输出文件命令--
             --转义符，如果文件名有-字符
+
+            juren.flv
+            - 
+            -- -juren.flv
         */
         if (opt[0] != '-' || !opt[1] || dashdash+1 == optindex) {
             ret = finish_group(octx, 0, opt);
@@ -873,7 +878,7 @@ do {                                                                           \
             continue;
         }
 
-        /* AVOptions */
+        /* AVOptions  搜索 avcodec_options*/
         if (argv[optindex]) {
             ret = opt_default(NULL, opt, argv[optindex]);
             if (ret >= 0) {

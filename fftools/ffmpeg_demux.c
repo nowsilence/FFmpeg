@@ -125,7 +125,7 @@ typedef struct Demuxer {
     /* number of streams that the user was warned of */
     int                   nb_streams_warn;
 
-    float                 readrate; 
+    float                 readrate; // -readrate 需要指定一个数值，该数值表示每秒读取的帧数。例如，如果设置-readrate 25，则意味着每秒读取25帧。这个参数对于确保视频流以正确的帧率进行播放至关重要，尤其是在处理不同帧率的视频源时。
     double                readrate_initial_burst;
 
     Scheduler            *sch;
@@ -1236,7 +1236,8 @@ static int ist_add(const OptionsContext *o, Demuxer *d, AVStream *st, AVDictiona
     char *next;
     const char *discard_str = NULL;
     int ret;
-
+    // ds被添加到d->f->streams
+    // st被添加到ds.ist里
     ds  = demux_stream_alloc(d, st);
     if (!ds)
         return AVERROR(ENOMEM);
@@ -1750,6 +1751,7 @@ int ifile_open(const OptionsContext *o, const char *filename, Scheduler *sch)
         av_dict_set(&o->g->format_opts, "scan_all_pmts", NULL, AV_DICT_MATCH_CASE);
     remove_avoptions(&o->g->format_opts, o->g->codec_opts);
 
+    // 检查是否有没使用的选项参数，有的话输出错误信息
     ret = check_avoptions(o->g->format_opts);
     if (ret < 0)
         return ret;
