@@ -274,6 +274,7 @@ static int write_option(void *optctx, const OptionDef *po, const char *opt,
     }
 
     if (po->flags & OPT_FLAG_SPEC) {
+        // 例如 -codec:a:0
         char *p = strchr(opt, ':');
         char *str;
 
@@ -287,9 +288,10 @@ static int write_option(void *optctx, const OptionDef *po, const char *opt,
             ret = AVERROR(ENOMEM);
             goto finish;
         }
-        sol->opt[sol->nb_opt - 1].specifier = str;
+        sol->opt[sol->nb_opt - 1].specifier = str; // a:0
 
         if (po->flags & OPT_FLAG_PERSTREAM) {
+            // 将a:0信息写入到sol->opt[sol->nb_opt - 1].stream_spec中
             ret = stream_specifier_parse(&sol->opt[sol->nb_opt - 1].stream_spec,
                                          str, 0, NULL);
             if (ret < 0)
@@ -609,7 +611,7 @@ int opt_default(void *optctx, const char *opt, const char *arg)
 
     if (!strcmp(opt, "debug") || !strcmp(opt, "fdebug"))
         av_log_set_level(AV_LOG_DEBUG);
-
+    // -codec:a:0 libmp3lame
     if (!(p = strchr(opt, ':')))
         p = opt + strlen(opt);
     av_strlcpy(opt_stripped, opt, FFMIN(sizeof(opt_stripped), p - opt + 1));
@@ -1082,6 +1084,7 @@ int stream_specifier_parse(StreamSpecifier *ss, const char *spec,
             av_log(logctx, AV_LOG_TRACE, "Parsed stream group %s: %"PRId64"; remainder: %s\n",
                    ss->stream_list == STREAM_LIST_GROUP_ID ? "ID" : "index", ss->list_id, spec);
         } else if (*spec == 'p' && *(spec + 1) == ':') {
+            // p:program_id[:additional_stream_specifier]
             if (ss->stream_list != STREAM_LIST_ALL)
                 goto multiple_stream_lists;
 

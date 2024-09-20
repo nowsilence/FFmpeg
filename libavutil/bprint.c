@@ -165,6 +165,7 @@ void av_bprint_append_data(AVBPrint *buf, const char *data, unsigned size)
     unsigned room, real_n;
 
     while (1) {
+        // 还剩下多少空间
         room = av_bprint_room(buf);
         if (size < room)
             break;

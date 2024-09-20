@@ -223,6 +223,9 @@ typedef struct OptionDef {
 /* Option is to be stored in a SpecifierOptList.
    Always use as OPT_SPEC in option definitions. */
 /* 参数在OptionsContext对象中的类型是否为SpecifierOptList */
+/* ffmpeg -i input.mp4 -map 0:a:0 -codec:a:0 libmp3lame -b:a:0 128k -map 0:a:1 -codec:a:1 libmp3lame -b:a:1 192k output.mp4
+    针对不同的流的设置，所以需要一个列表
+*/
 #define OPT_FLAG_SPEC   (1 << 9)
 #define OPT_SPEC        (OPT_FLAG_SPEC | OPT_OFFSET)
 
