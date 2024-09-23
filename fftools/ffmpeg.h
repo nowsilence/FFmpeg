@@ -148,8 +148,12 @@ typedef struct OptionsContext {
     SpecifierOptList frame_pix_fmts;
 
     /* input options */
+    /**
+     * ffmpeg -itsoffset 0.3 -i input.mp4 -c:v copy -c:a aac output.mp4
+     * 使用ffmpeg对输入文件input.mp4的音频重新编码，输出文件output.mp4;itsoffset设置0.3秒偏移量，使整个文件的音频向后延迟0.3秒，
+     */
     int64_t input_ts_offset;
-    int loop;
+    int loop; // -stream_loop -1表示无限循环
     int rate_emu; // -re 等价 -readrate 1 用于以原始帧率读取输入文件。‌这意味着，当处理具有可变帧率（VFR）的视频时，FFmpeg会尝试以最接近原始视频的帧率来读取和输出数据，而不是尝试重新采样到恒定的帧率。
     float readrate; // // -readrate 需要指定一个数值，该数值表示每秒读取的帧数。例如，如果设置-readrate 25，则意味着每秒读取25帧。这个参数对于确保视频流以正确的帧率进行播放至关重要，尤其是在处理不同帧率的视频源时。
     double readrate_initial_burst;
@@ -193,7 +197,7 @@ typedef struct OptionsContext {
 
     SpecifierOptList metadata;
     SpecifierOptList max_frames;
-    SpecifierOptList bitstream_filters;
+    SpecifierOptList bitstream_filters; // -bsf/-abas 用于音频 -vbsf 用于视屏, 码流过滤器，例如h264_mp4toannexb_bsf，这个过滤器的作用是把h264以MP4格式的NALU转换为annexb（0x000001）
     SpecifierOptList codec_tags;
     SpecifierOptList sample_fmts;
     SpecifierOptList qscale;

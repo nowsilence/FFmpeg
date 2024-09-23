@@ -131,6 +131,9 @@ int64_t av_rescale(int64_t a, int64_t b, int64_t c)
     return av_rescale_rnd(a, b, c, AV_ROUND_NEAR_INF);
 }
 
+/**
+ * 计算a * bq / cq，也就是将以时间基bq表示的时间戳a转换成以时间基cq表示。
+ */
 int64_t av_rescale_q_rnd(int64_t a, AVRational bq, AVRational cq,
                          enum AVRounding rnd)
 {

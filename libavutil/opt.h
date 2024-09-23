@@ -797,7 +797,7 @@ int av_opt_set_dict(void *obj, struct AVDictionary **options);
 
 /**
  * Set all the options from a given dictionary on an object.
- *
+ * 把options上的选项都设置到obj上，函数返回后options里的值是obj不存在的参数
  * @param obj a struct whose first element is a pointer to AVClass
  * @param options options to process. This dictionary will be freed and replaced
  *                by a new one containing all options not found in obj.

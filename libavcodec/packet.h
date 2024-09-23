@@ -530,7 +530,25 @@ typedef struct AVPacket {
      * Can be AV_NOPTS_VALUE if it is not stored in the file.
      */
     int64_t dts;
-    uint8_t *data;
+    /**
+     * packet.c
+     * int av_new_packet(AVPacket *pkt, int size)
+        {
+            AVBufferRef *buf = NULL;
+            int ret = packet_alloc(&buf, size);
+            if (ret < 0)
+                return ret;
+
+            get_packet_defaults(pkt);
+            pkt->buf      = buf;
+            pkt->data     = buf->data;
+            pkt->size     = size;
+
+            return 0;
+        }
+     */
+    uint8_t *data; // 与buf->data相同
+ 
     int   size;
     int   stream_index;
     /**

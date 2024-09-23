@@ -140,7 +140,7 @@ typedef struct Demuxer {
 typedef struct DemuxThreadContext {
     // packet used for reading from the demuxer
     AVPacket *pkt_demux;
-    // packet for reading from BSFs
+    // packet for reading from BSFs(bitstream filters)
     AVPacket *pkt_bsf;
 } DemuxThreadContext;
 
@@ -1640,6 +1640,19 @@ int ifile_open(const OptionsContext *o, const char *filename, Scheduler *sch)
 
     if (o->format) {
         // 查找音/视频的格式
+        /*
+        p: AVInputFormat
+        const FFInputFormat ff_mpegps_demuxer = {
+            .p.name         = "mpeg",
+            .p.long_name    = NULL_IF_CONFIG_SMALL("MPEG-PS (MPEG-2 Program Stream)"),
+            .p.flags        = AVFMT_SHOW_IDS | AVFMT_TS_DISCONT,
+            .priv_data_size = sizeof(MpegDemuxContext),
+            .read_probe     = mpegps_probe,
+            .read_header    = mpegps_read_header,
+            .read_packet    = mpegps_read_packet,
+            .read_timestamp = mpegps_read_dts,
+        };
+        */
         if (!(file_iformat = av_find_input_format(o->format))) {
             av_log(d, AV_LOG_FATAL, "Unknown input format: '%s'\n", o->format);
             return AVERROR(EINVAL);
@@ -1749,6 +1762,7 @@ int ifile_open(const OptionsContext *o, const char *filename, Scheduler *sch)
 
     if (scan_all_pmts_set)
         av_dict_set(&o->g->format_opts, "scan_all_pmts", NULL, AV_DICT_MATCH_CASE);
+    // 从o->g->format_opts删除o->g->codec_opts选项
     remove_avoptions(&o->g->format_opts, o->g->codec_opts);
 
     // 检查是否有没使用的选项参数，有的话输出错误信息
@@ -1839,6 +1853,7 @@ int ifile_open(const OptionsContext *o, const char *filename, Scheduler *sch)
     f->start_time = start_time;
     d->recording_time = recording_time;
     f->input_sync_ref = o->input_sync_ref;
+    
     f->input_ts_offset = o->input_ts_offset;
     f->ts_offset  = o->input_ts_offset - (copy_ts ? (start_at_zero && ic->start_time != AV_NOPTS_VALUE ? ic->start_time : 0) : timestamp);
     d->accurate_seek   = o->accurate_seek;
